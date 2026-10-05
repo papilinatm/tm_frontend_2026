@@ -1,0 +1,65 @@
+<div class="login-container">
+  <h2>Вход в систему</h2>
+
+  @if (errorMessage) { 
+    <div class="alert alert-error">
+      {{ errorMessage }}
+    </div>
+  }
+
+  <form #f="ngForm" (ngSubmit)="onSubmit(f)" novalidate>
+    
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Логин</mat-label>
+      <input 
+        matInput
+        id="login" 
+        type="text" 
+        name="login"
+        [(ngModel)]="credentials.login"
+        #loginModel="ngModel"
+        placeholder="Введите логин"
+        required
+      />
+      @if ((f.submitted || loginModel.touched) && loginModel.errors?.['required']) {
+        <mat-error>Login required</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Пароль</mat-label>
+      <input 
+        matInput
+        id="password" 
+        [type]="hidePassword ? 'password' : 'text'" 
+        name="password"
+        [(ngModel)]="credentials.password"
+        #passwordModel="ngModel"
+        placeholder="Введите пароль"
+        required
+      />
+      <button 
+        mat-icon-button 
+        matSuffix 
+        type="button" 
+        (click)="togglePasswordVisibility()"
+        tabindex="-1"
+      >
+        <mat-icon>{{ hidePassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+      </button>
+      @if ((f.submitted || passwordModel.touched) && passwordModel.errors?.['required']) {
+        <mat-error>Password required</mat-error>
+      }
+    </mat-form-field>
+
+    <button 
+      mat-raised-button 
+      color="primary" 
+      type="submit" 
+      class="full-width submit-btn"
+    >
+      Log In
+    </button>
+    
+  </form>
+</div>

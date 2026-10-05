@@ -1,0 +1,10 @@
+mat-toolbar 
+{
+    background-color: royalblue;
+    height: 64px;
+}
+h1 
+{
+    color: white;
+    margin-left: 0.5em;
+}

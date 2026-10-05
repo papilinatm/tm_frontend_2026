@@ -1,0 +1,14 @@
+
+<mat-slide-toggle [checked]="IsWeek" #st (change)="ChangeForecast(st.checked)">Week Forecast</mat-slide-toggle>
+<div class="card highlight-card">
+
+@if (IsWeek) {
+  <div>
+    @for (f of WeekForecast; track f) {
+      <app-one-day [f]="f"></app-one-day>
+    }
+  </div>
+} @else {
+  <app-one-day [f]="DayForecast"></app-one-day>  
+}
+</div>
