@@ -1,8 +1,9 @@
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
-import { OneDayComponent } from './one-day/one-day.component';
-import { ForecastService, IWeatherForecast } from '../../services/forecast/forecast.service';
+import { Component, OnInit, OnDestroy, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatSlideToggle } from '@angular/material/slide-toggle';
+import { Subscription } from 'rxjs';
+import { OneDayComponent } from './one-day/one-day.component';
+import { ForecastService, IWeatherForecast } from '../../services/forecast/forecast.service';
 
 @Component({
   selector: 'app-weather',
@@ -10,37 +11,49 @@ import { MatSlideToggle } from '@angular/material/slide-toggle';
   styleUrls: ['./weather.component.css'],
   imports: [OneDayComponent, MatSlideToggle]
 })
-export class WeatherComponent implements OnInit {
+export class WeatherComponent implements OnInit, OnDestroy {
+  
+  private readonly activatedRoute = inject(ActivatedRoute);
+  private readonly forecastService = inject(ForecastService);
+  private readonly route = inject(Router);
 
-  public DayForecast:IWeatherForecast = {} as IWeatherForecast;
-  public WeekForecast:IWeatherForecast[]=[];
-  public IsWeek:boolean = false;
+  public readonly dayForecast = signal<IWeatherForecast | null>(null);
+  public readonly weekForecast = signal<IWeatherForecast[]>([]);
+  public readonly isWeek = signal<boolean>(false);
 
-  constructor(private activatedRoute: ActivatedRoute, 
-    private _wfServise:ForecastService,
-     private route:Router,
-    private cdr: ChangeDetectorRef
-  ) { 
-    this.IsWeek= activatedRoute.snapshot.params['week']=="week";
-  }
+  private routeSub?: Subscription;
+  private forecastDataSub?: Subscription;
 
   ngOnInit(): void {
-    this._wfServise.getDayForecast().subscribe(res=> 
-      {
-        this.DayForecast=res;      
-        this.cdr.detectChanges();
-      });
-    this._wfServise.getWeekForecast().subscribe(res=> 
-      {
-        this.WeekForecast=res;      
-        this.cdr.detectChanges();
-      });
+    this.routeSub = this.activatedRoute.params.subscribe(params => {
+      this.isWeek.set(params['week'] === 'week');
+      this.loadForecastData();
+    });
   }
-  ChangeForecast(isWeek:boolean){
-    //this.IsWeek=isWeek;
-    this.DayForecast = {} as IWeatherForecast;
-    this.WeekForecast = [];
-    this.route.navigate([isWeek?'week':''], {relativeTo: this.activatedRoute});
+
+  private loadForecastData(): void {
+    this.forecastDataSub?.unsubscribe(); 
+
+    this.dayForecast.set(null);
+    this.weekForecast.set([]);
+
+    if (this.isWeek()) {
+      this.forecastDataSub = this.forecastService.getWeekForecast().subscribe(res => {
+        this.weekForecast.set(res); 
+      });
+    } else {
+      this.forecastDataSub = this.forecastService.getDayForecast().subscribe(res => {
+        this.dayForecast.set(res); 
+      });
+    }
+  }
+
+  public changeForecast(checked: boolean): void {
+    this.route.navigate([checked ? '/weather/week' : '/weather']);
+  }
+
+  ngOnDestroy(): void {
+    this.routeSub?.unsubscribe();
+    this.forecastDataSub?.unsubscribe();
   }
 }
-

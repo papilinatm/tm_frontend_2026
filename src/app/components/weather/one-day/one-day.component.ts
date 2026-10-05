@@ -12,12 +12,14 @@ import { MatCardModule } from '@angular/material/card';
 export class OneDayComponent implements OnInit {
 
   @Input()
-  public f:IWeatherForecast = {} as IWeatherForecast;
+  public f:IWeatherForecast|null = null;
   constructor() { }
 
   ngOnInit(): void {
   }
-  public getColor(f: IWeatherForecast):string {
+  public getColor(f: IWeatherForecast|null):string {
+    if (!f)
+      return "none";
     if(f?.temperatureC<0)
       return "cold";
     else if (f?.temperatureC<25)

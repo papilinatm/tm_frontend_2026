@@ -1,4 +1,6 @@
-<mat-card  appearance="outlined"  [class]="getColor(f)">
+@if(f)
+{
+    <mat-card  appearance="outlined"  [class]="getColor(f)">
     <mat-card-header>
         <mat-card-title>{{f?.date|date:'dd.MM'}}</mat-card-title>
     </mat-card-header>
@@ -9,3 +11,4 @@
     <p>{{f?.temperatureC}} &#8451; ({{f?.summary}})</p>
     </mat-card-content>
 </mat-card>
+}
